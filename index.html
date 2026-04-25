@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Kode Pos Indonesia</title>
+    <style>
+        :root {
+            --pastel-blue: #A7C7E7;
+            --pastel-yellow: #FEF9C3;
+            --soft-white: #FAF9F6;
+            --text-dark: #4A4A4A;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-white);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+            border: 4px solid var(--pastel-yellow);
+        }
+
+        h2 {
+            text-align: center;
+            color: #5D9CEC;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #888;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--pastel-blue);
+            border-radius: 12px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            color: var(--text-dark);
+        }
+
+        select:focus {
+            border-color: #FACC15;
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
+        }
+
+        select:disabled {
+            background-color: #f5f5f5;
+            border-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: var(--pastel-yellow);
+            border-radius: 15px;
+            display: none;
+            text-align: center;
+            border: 2px dashed #FACC15;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .zip-code {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #2D3748;
+            margin: 5px 0;
+            letter-spacing: 2px;
+        }
+
+        .info-detail {
+            font-size: 0.95rem;
+            color: #4A5568;
+            line-height: 1.4;
+        }
+
+        .label-result {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #718096;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Cari Kode Pos 📮</h2>
+
+    <div class="form-group">
+        <label>Provinsi</label>
+        <select id="provinsi">
+            <option value="">-- Pilih Provinsi --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Kabupaten / Kota</label>
+        <select id="kota" disabled>
+            <option value="">-- Pilih Kota --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Kecamatan</label>
+        <select id="kecamatan" disabled>
+            <option value="">-- Pilih Kecamatan --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Kelurahan / Desa</label>
+        <select id="kelurahan" disabled>
+            <option value="">-- Pilih Kelurahan --</option>
+        </select>
+    </div>
+
+    <div id="result">
+        <p class="label-result">Kode Pos Anda:</p>
+        <div class="zip-code" id="res_code">00000</div>
+        <div class="info-detail" id="res_info"></div>
+    </div>
+</div>
+
+<script>
+const postalData = {
+    "Jawa Timur": {
+        "Surabaya": {
+            "Sukolilo": { "Keputih": "60111", "Menur Pumpungan": "60118", "Gebang Putih": "60117", "Klampis Ngasem": "60116", "Medokan Semampir": "60119" },
+            "Mulyorejo": { "Kalijudan": "60114", "Kalisari": "60112", "Mulyorejo": "60115", "Sutorejo": "60113", "Manyar Sabrangan": "60116" },
+            "Gubeng": { "Airlangga": "60286", "Barata Jaya": "60284", "Gubeng": "60281", "Kertajaya": "60282", "Mojo": "60285" },
+            "Wonokromo": { "Darmo": "60241", "Sawunggaling": "60242", "Wonokromo": "60243", "Jagir": "60244" },
+            "Tegalsari": { "Kedungdoro": "60261", "Keputran": "60265", "Tegalsari": "60262", "Dr. Soetomo": "60264" },
+            "Rungkut": { "Kali Rungkut": "60293", "Kedung Baruk": "60298", "Penjaringan Sari": "60297", "Wonorejo": "60296" }
+        },
+        "Sidoarjo": {
+            "Waru": { "Warusemesta": "61256", "Bungurasih": "61256", "Kureksari": "61256", "Ngingas": "61256", "Tambak Oso": "61256" },
+            "Taman": { "Geluran": "61257", "Kalijaten": "61257", "Sepanjang": "61257", "Wonocolo": "61257" },
+            "Krian": { "Krian": "61262", "Barengkrajan": "61262", "Sidorejo": "61262" },
+            "Buduran": { "Buduran": "61252", "Siwalanpanji": "61252", "Sidokepung": "61252" }
+        },
+        "Gresik": {
+            "Kebomas": { "Dahanrejo": "61124", "Randuagung": "61121", "Sekarkurung": "61124" },
+            "Manyar": { "Suci": "61151", "Yosowilangun": "61151", "Pongangan": "61151" },
+            "Driyorejo": { "Petiken": "61177", "Sumput": "61177", "Tenaru": "61177" }
+        },
+        "Malang": {
+            "Lowokwaru": { "Dinoyo": "65144", "Jatimulyo": "65141", "Tulusrejo": "65141", "Tunggulwulung": "65143" },
+            "Klojen": { "Bareng": "65116", "Gadingkasri": "65115", "Oro-oro Dowo": "65119", "Penanggungan": "65113" },
+            "Blimbing": { "Arjosari": "65126", "Balearjosari": "65126", "Polowijen": "65126", "Purwodadi": "65126" },
+            "Sukun": { "Bandulan": "65146", "Tanjungrejo": "65147", "Mulyorejo": "65147" }
+        },
+        "Kediri": {
+            "Kediri Kota": {
+                "Mojoroto": "64112",
+                "Pesantren": "64131",
+                "Kampung Dalem": "64126"
+            }
+        },
+        "Jember": {
+            "Kaliwates": {
+                "Kepatihan": "68131",
+                "Sumbersari": "68121",
+                "Tegal Besar": "68132"
+            }
+        }
+    },
+
+      "Jawa Tengah": {
+          "Semarang": {
+              "Tembalang": { "Tembalang": "50275", "Bulusan": "50277", "Kramas": "50278" },
+              "Banyumanik": { "Srondol Kulon": "50263", "Ngesrep": "50261", "Padangsari": "50267" },
+              "Candisari": { "Jatingaleh": "50254", "Karanganyar Gunung": "50252" }
+          },
+          "Solo": {
+              "Banjarsari": { "Kadipiro": "57136", "Nusukan": "57135", "Manahan": "57139" },
+              "Laweyan": { "Pajang": "57146", "Sondakan": "57147" }
+          }
+      },
+
+      "DKI Jakarta": {
+          "Jakarta Selatan": {
+              "Tebet": { "Tebet Barat": "12810", "Tebet Timur": "12820", "Kebon Baru": "12830", "Manggarai": "12850" },
+              "Setiabudi": { "Kuningan Timur": "12950", "Karet": "12920", "Menteng Atas": "12960" },
+              "Pasar Minggu": { "Pejaten Barat": "12510", "Ragunan": "12550", "Cilandak Timur": "12560" }
+          },
+          "Jakarta Barat": {
+              "Kebon Jeruk": { "Kebon Jeruk": "11530", "Sukabumi Selatan": "11560", "Duri Kepa": "11510" },
+              "Palmerah": { "Slipi": "11410", "Palmerah": "11480" }
+          }
+      },
+
+      "Jawa Barat": {
+          "Bandung": {
+              "Coblong": { "Dago": "40135", "Lebak Gede": "40132", "Sekeloa": "40134" },
+              "Lengkong": { "Burangrang": "40262", "Malabar": "40262" }
+          },
+          "Bekasi": {
+              "Bekasi Selatan": { "Kayuringin": "17144", "Pekayon Jaya": "17148" },
+              "Bekasi Timur": { "Margahayu": "17113", "Duren Jaya": "17111" }
+          }
+      }
+  };
+
+    const selProv = document.getElementById('provinsi');
+    const selKota = document.getElementById('kota');
+    const selKec = document.getElementById('kecamatan');
+    const selKel = document.getElementById('kelurahan');
+    const resultDiv = document.getElementById('result');
+
+    // Load Provinsi
+    Object.keys(postalData).forEach(prov => {
+        const opt = new Option(prov, prov);
+        selProv.add(opt);
+    });
+
+    selProv.onchange = function() {
+        selKota.innerHTML = '<option value="">-- Pilih Kota --</option>';
+        selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+        selKota.disabled = !this.value;
+        selKec.disabled = true;
+        selKel.disabled = true;
+        resultDiv.style.display = 'none';
+
+        if (this.value) {
+            const cities = Object.keys(postalData[this.value]);
+            cities.forEach(city => selKota.add(new Option(city, city)));
+        }
+    };
+
+    selKota.onchange = function() {
+        selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+        selKec.disabled = !this.value;
+        selKel.disabled = true;
+        resultDiv.style.display = 'none';
+
+        if (this.value) {
+            const districts = Object.keys(postalData[selProv.value][this.value]);
+            districts.forEach(dist => selKec.add(new Option(dist, dist)));
+        }
+    };
+
+    selKec.onchange = function() {
+        selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+        selKel.disabled = !this.value;
+        resultDiv.style.display = 'none';
+
+        if (this.value) {
+            const subDistricts = Object.keys(postalData[selProv.value][selKota.value][this.value]);
+            subDistricts.forEach(sub => selKel.add(new Option(sub, sub)));
+        }
+    };
+
+    selKel.onchange = function() {
+        if (this.value) {
+            const zip = postalData[selProv.value][selKota.value][selKec.value][this.value];
+            document.getElementById('res_code').innerText = zip;
+            document.getElementById('res_info').innerHTML = `
+                Kel. ${this.value}, Kec. ${selKec.value}<br>
+                ${selKota.value}, ${selProv.value}
+            `;
+            resultDiv.style.display = 'block';
+        } else {
+            resultDiv.style.display = 'none';
+        }
+    };
+</script>
+
+</body>
+</html>
